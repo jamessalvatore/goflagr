@@ -33,13 +33,24 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **GetExportSqlite**
-> *os.File GetExportSqlite(ctx, )
+> *os.File GetExportSqlite(ctx, optional)
 
 
 Export sqlite3 format of the db dump, which is converted from the main database.
 
 ### Required Parameters
-This endpoint does not need any parameter.
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+ **optional** | ***GetExportSqliteOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+Optional parameters are passed through a pointer to a GetExportSqliteOpts struct
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **excludeSnapshots** | **optional.Bool**| export without snapshots data - useful for smaller db without snapshots  | 
 
 ### Return type
 

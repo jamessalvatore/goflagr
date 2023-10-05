@@ -9,6 +9,8 @@ Name | Type | Description | Notes
 **EnableDebug** | **bool** |  | [optional] [default to null]
 **FlagID** | **int64** | flagID | [optional] [default to null]
 **FlagKey** | **string** | flagKey. flagID or flagKey will resolve to the same flag. Either works. | [optional] [default to null]
+**FlagTags** | **[]string** | flagTags. flagTags looks up flags by tag. Either works. | [optional] [default to null]
+**FlagTagsOperator** | **string** | determine how flagTags is used to filter flags to be evaluated. OR extends the evaluation to those which contains at least one of the provided flagTags or AND limit the evaluation to those which contains all the flagTags. | [optional] [default to null]
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

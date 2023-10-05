@@ -16,6 +16,8 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/antihax/optional"
 )
 
 // Linger please
@@ -23,27 +25,27 @@ var (
 	_ context.Context
 )
 
-type VariantApiService service
+type TagApiService service
 
 /*
-VariantApiService
+TagApiService
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param flagID numeric ID of the flag
- * @param body create a variant
+ * @param body create a tag
 
-@return Variant
+@return Tag
 */
-func (a *VariantApiService) CreateVariant(ctx context.Context, flagID int64, body CreateVariantRequest) (Variant, *http.Response, error) {
+func (a *TagApiService) CreateTag(ctx context.Context, flagID int64, body CreateTagRequest) (Tag, *http.Response, error) {
 	var (
 		localVarHttpMethod  = strings.ToUpper("Post")
 		localVarPostBody    interface{}
 		localVarFileName    string
 		localVarFileBytes   []byte
-		localVarReturnValue Variant
+		localVarReturnValue Tag
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/flags/{flagID}/variants"
+	localVarPath := a.client.cfg.BasePath + "/flags/{flagID}/tags"
 	localVarPath = strings.Replace(localVarPath, "{"+"flagID"+"}", fmt.Sprintf("%v", flagID), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -103,7 +105,7 @@ func (a *VariantApiService) CreateVariant(ctx context.Context, flagID int64, bod
 		}
 
 		if localVarHttpResponse.StatusCode == 200 {
-			var v Variant
+			var v Tag
 			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -131,14 +133,14 @@ func (a *VariantApiService) CreateVariant(ctx context.Context, flagID int64, bod
 }
 
 /*
-VariantApiService
+TagApiService
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param flagID numeric ID of the flag
- * @param variantID numeric ID of the variant
+ * @param tagID numeric ID of the tag
 
 
 */
-func (a *VariantApiService) DeleteVariant(ctx context.Context, flagID int64, variantID int64) (*http.Response, error) {
+func (a *TagApiService) DeleteTag(ctx context.Context, flagID int64, tagID int64) (*http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Delete")
 		localVarPostBody   interface{}
@@ -147,9 +149,9 @@ func (a *VariantApiService) DeleteVariant(ctx context.Context, flagID int64, var
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/flags/{flagID}/variants/{variantID}"
+	localVarPath := a.client.cfg.BasePath + "/flags/{flagID}/tags/{tagID}"
 	localVarPath = strings.Replace(localVarPath, "{"+"flagID"+"}", fmt.Sprintf("%v", flagID), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"variantID"+"}", fmt.Sprintf("%v", variantID), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"tagID"+"}", fmt.Sprintf("%v", tagID), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -157,8 +159,8 @@ func (a *VariantApiService) DeleteVariant(ctx context.Context, flagID int64, var
 	if flagID < 1 {
 		return nil, reportError("flagID must be greater than 1")
 	}
-	if variantID < 1 {
-		return nil, reportError("variantID must be greater than 1")
+	if tagID < 1 {
+		return nil, reportError("tagID must be greater than 1")
 	}
 
 	// to determine the Content-Type header
@@ -218,32 +220,47 @@ func (a *VariantApiService) DeleteVariant(ctx context.Context, flagID int64, var
 }
 
 /*
-VariantApiService
+TagApiService
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param flagID numeric ID of the flag
+ * @param optional nil or *FindAllTagsOpts - Optional Parameters:
+     * @param "Limit" (optional.Int64) -  the numbers of tags to return
+     * @param "Offset" (optional.Int64) -  return tags given the offset, it should usually set together with limit
+     * @param "ValueLike" (optional.String) -  return tags partially matching given value
 
-@return []Variant
+@return []Tag
 */
-func (a *VariantApiService) FindVariants(ctx context.Context, flagID int64) ([]Variant, *http.Response, error) {
+
+type FindAllTagsOpts struct {
+	Limit     optional.Int64
+	Offset    optional.Int64
+	ValueLike optional.String
+}
+
+func (a *TagApiService) FindAllTags(ctx context.Context, localVarOptionals *FindAllTagsOpts) ([]Tag, *http.Response, error) {
 	var (
 		localVarHttpMethod  = strings.ToUpper("Get")
 		localVarPostBody    interface{}
 		localVarFileName    string
 		localVarFileBytes   []byte
-		localVarReturnValue []Variant
+		localVarReturnValue []Tag
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/flags/{flagID}/variants"
-	localVarPath = strings.Replace(localVarPath, "{"+"flagID"+"}", fmt.Sprintf("%v", flagID), -1)
+	localVarPath := a.client.cfg.BasePath + "/tags"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if flagID < 1 {
-		return localVarReturnValue, nil, reportError("flagID must be greater than 1")
-	}
 
+	if localVarOptionals != nil && localVarOptionals.Limit.IsSet() {
+		localVarQueryParams.Add("limit", parameterToString(localVarOptionals.Limit.Value(), ""))
+	}
+	if localVarOptionals != nil && localVarOptionals.Offset.IsSet() {
+		localVarQueryParams.Add("offset", parameterToString(localVarOptionals.Offset.Value(), ""))
+	}
+	if localVarOptionals != nil && localVarOptionals.ValueLike.IsSet() {
+		localVarQueryParams.Add("value_like", parameterToString(localVarOptionals.ValueLike.Value(), ""))
+	}
 	// to determine the Content-Type header
 	localVarHttpContentTypes := []string{"application/json"}
 
@@ -292,7 +309,7 @@ func (a *VariantApiService) FindVariants(ctx context.Context, flagID int64) ([]V
 		}
 
 		if localVarHttpResponse.StatusCode == 200 {
-			var v []Variant
+			var v []Tag
 			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -320,36 +337,30 @@ func (a *VariantApiService) FindVariants(ctx context.Context, flagID int64) ([]V
 }
 
 /*
-VariantApiService
+TagApiService
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param flagID numeric ID of the flag
- * @param variantID numeric ID of the variant
- * @param body update a variant
 
-@return Variant
+@return []Tag
 */
-func (a *VariantApiService) PutVariant(ctx context.Context, flagID int64, variantID int64, body PutVariantRequest) (Variant, *http.Response, error) {
+func (a *TagApiService) FindTags(ctx context.Context, flagID int64) ([]Tag, *http.Response, error) {
 	var (
-		localVarHttpMethod  = strings.ToUpper("Put")
+		localVarHttpMethod  = strings.ToUpper("Get")
 		localVarPostBody    interface{}
 		localVarFileName    string
 		localVarFileBytes   []byte
-		localVarReturnValue Variant
+		localVarReturnValue []Tag
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/flags/{flagID}/variants/{variantID}"
+	localVarPath := a.client.cfg.BasePath + "/flags/{flagID}/tags"
 	localVarPath = strings.Replace(localVarPath, "{"+"flagID"+"}", fmt.Sprintf("%v", flagID), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"variantID"+"}", fmt.Sprintf("%v", variantID), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 	if flagID < 1 {
 		return localVarReturnValue, nil, reportError("flagID must be greater than 1")
-	}
-	if variantID < 1 {
-		return localVarReturnValue, nil, reportError("variantID must be greater than 1")
 	}
 
 	// to determine the Content-Type header
@@ -369,8 +380,6 @@ func (a *VariantApiService) PutVariant(ctx context.Context, flagID int64, varian
 	if localVarHttpHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHttpHeaderAccept
 	}
-	// body params
-	localVarPostBody = &body
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFileName, localVarFileBytes)
 	if err != nil {
 		return localVarReturnValue, nil, err
@@ -402,7 +411,7 @@ func (a *VariantApiService) PutVariant(ctx context.Context, flagID int64, varian
 		}
 
 		if localVarHttpResponse.StatusCode == 200 {
-			var v Variant
+			var v []Tag
 			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()

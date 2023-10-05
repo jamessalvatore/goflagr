@@ -3,7 +3,7 @@ swagger: "2.0"
 info:
   description: "Flagr is a feature flagging, A/B testing and dynamic configuration\
     \ microservice. The base path for all the APIs is \"/api/v1\".\n"
-  version: "1.1.4"
+  version: "1.1.16"
   title: "Flagr"
 basePath: "/api/v1"
 tags:
@@ -56,6 +56,13 @@ paths:
         type: "string"
         x-exportParamName: "Description"
         x-optionalDataType: "String"
+      - name: "tags"
+        in: "query"
+        description: "return flags with the given tags (comma separated)"
+        required: false
+        type: "string"
+        x-exportParamName: "Tags"
+        x-optionalDataType: "String"
       - name: "description_like"
         in: "query"
         description: "return flags partially matching given description"
@@ -85,6 +92,13 @@ paths:
         required: false
         type: "boolean"
         x-exportParamName: "Preload"
+        x-optionalDataType: "Bool"
+      - name: "deleted"
+        in: "query"
+        description: "return all deleted flags"
+        required: false
+        type: "boolean"
+        x-exportParamName: "Deleted"
         x-optionalDataType: "Bool"
       responses:
         "200":
@@ -190,6 +204,29 @@ paths:
           description: "generic error response"
           schema:
             $ref: "#/definitions/error"
+  /flags/{flagID}/restore:
+    put:
+      tags:
+      - "flag"
+      operationId: "restoreFlag"
+      parameters:
+      - name: "flagID"
+        in: "path"
+        description: "numeric ID of the flag to get"
+        required: true
+        type: "integer"
+        minimum: 1
+        format: "int64"
+        x-exportParamName: "FlagID"
+      responses:
+        "200":
+          description: "returns the flag"
+          schema:
+            $ref: "#/definitions/flag"
+        default:
+          description: "generic error response"
+          schema:
+            $ref: "#/definitions/error"
   /flags/{flagID}/enabled:
     put:
       tags:
@@ -216,6 +253,89 @@ paths:
           description: "returns the flag"
           schema:
             $ref: "#/definitions/flag"
+        default:
+          description: "generic error response"
+          schema:
+            $ref: "#/definitions/error"
+  /flags/{flagID}/tags:
+    get:
+      tags:
+      - "tag"
+      operationId: "findTags"
+      parameters:
+      - name: "flagID"
+        in: "path"
+        description: "numeric ID of the flag"
+        required: true
+        type: "integer"
+        minimum: 1
+        format: "int64"
+        x-exportParamName: "FlagID"
+      responses:
+        "200":
+          description: "tag ordered by tagID"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/tag"
+        default:
+          description: "generic error response"
+          schema:
+            $ref: "#/definitions/error"
+    post:
+      tags:
+      - "tag"
+      operationId: "createTag"
+      parameters:
+      - name: "flagID"
+        in: "path"
+        description: "numeric ID of the flag"
+        required: true
+        type: "integer"
+        minimum: 1
+        format: "int64"
+        x-exportParamName: "FlagID"
+      - in: "body"
+        name: "body"
+        description: "create a tag"
+        required: true
+        schema:
+          $ref: "#/definitions/createTagRequest"
+        x-exportParamName: "Body"
+      responses:
+        "200":
+          description: "tag just created"
+          schema:
+            $ref: "#/definitions/tag"
+        default:
+          description: "generic error response"
+          schema:
+            $ref: "#/definitions/error"
+  /flags/{flagID}/tags/{tagID}:
+    delete:
+      tags:
+      - "tag"
+      operationId: "deleteTag"
+      parameters:
+      - name: "flagID"
+        in: "path"
+        description: "numeric ID of the flag"
+        required: true
+        type: "integer"
+        minimum: 1
+        format: "int64"
+        x-exportParamName: "FlagID"
+      - name: "tagID"
+        in: "path"
+        description: "numeric ID of the tag"
+        required: true
+        type: "integer"
+        minimum: 1
+        format: "int64"
+        x-exportParamName: "TagID"
+      responses:
+        "200":
+          description: "deleted"
         default:
           description: "generic error response"
           schema:
@@ -727,6 +847,23 @@ paths:
         minimum: 1
         format: "int64"
         x-exportParamName: "FlagID"
+      - name: "limit"
+        in: "query"
+        description: "the number of snapshots to return"
+        required: false
+        type: "integer"
+        format: "int64"
+        x-exportParamName: "Limit"
+        x-optionalDataType: "Int64"
+      - name: "offset"
+        in: "query"
+        description: "return snapshots given the offset, it should usually set together\
+          \ with limit"
+        required: false
+        type: "integer"
+        format: "int64"
+        x-exportParamName: "Offset"
+        x-optionalDataType: "Int64"
       responses:
         "200":
           description: "returns the flag snapshots"
@@ -752,6 +889,47 @@ paths:
             items:
               type: "string"
               minLength: 1
+        default:
+          description: "generic error response"
+          schema:
+            $ref: "#/definitions/error"
+  /tags:
+    get:
+      tags:
+      - "tag"
+      operationId: "findAllTags"
+      parameters:
+      - name: "limit"
+        in: "query"
+        description: "the numbers of tags to return"
+        required: false
+        type: "integer"
+        format: "int64"
+        x-exportParamName: "Limit"
+        x-optionalDataType: "Int64"
+      - name: "offset"
+        in: "query"
+        description: "return tags given the offset, it should usually set together\
+          \ with limit"
+        required: false
+        type: "integer"
+        format: "int64"
+        x-exportParamName: "Offset"
+        x-optionalDataType: "Int64"
+      - name: "value_like"
+        in: "query"
+        description: "return tags partially matching given value"
+        required: false
+        type: "string"
+        x-exportParamName: "ValueLike"
+        x-optionalDataType: "String"
+      responses:
+        "200":
+          description: "list all the tags"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/tag"
         default:
           description: "generic error response"
           schema:
@@ -825,7 +1003,15 @@ paths:
       operationId: "getExportSqlite"
       produces:
       - "application/octet-stream"
-      parameters: []
+      parameters:
+      - name: "exclude_snapshots"
+        in: "query"
+        description: "export without snapshots data - useful for smaller db without\
+          \ snapshots\n"
+        required: false
+        type: "boolean"
+        x-exportParamName: "ExcludeSnapshots"
+        x-optionalDataType: "Bool"
       responses:
         "200":
           description: "OK"
@@ -875,6 +1061,10 @@ definitions:
         minLength: 1
       enabled:
         type: "boolean"
+      tags:
+        type: "array"
+        items:
+          $ref: "#/definitions/tag"
       segments:
         type: "array"
         items:
@@ -905,10 +1095,8 @@ definitions:
       notes: "notes"
       updatedBy: "updatedBy"
       dataRecordsEnabled: true
-      createdBy: "createdBy"
       entityType: "entityType"
       description: "description"
-      id: 1
       variants:
       - attachment: "{}"
         id: 1
@@ -916,13 +1104,17 @@ definitions:
       - attachment: "{}"
         id: 1
         key: "key"
-      key: "key"
       enabled: true
+      tags:
+      - id: 1
+        value: "value"
+      - id: 1
+        value: "value"
       segments:
       - description: "description"
         rank: 0
         id: 1
-        rolloutPercent: 93
+        rolloutPercent: 36
         constraints:
         - property: "property"
           id: 1
@@ -936,15 +1128,15 @@ definitions:
         - id: 1
           variantID: 1
           variantKey: "variantKey"
-          percent: 56
+          percent: 23
         - id: 1
           variantID: 1
           variantKey: "variantKey"
-          percent: 56
+          percent: 23
       - description: "description"
         rank: 0
         id: 1
-        rolloutPercent: 93
+        rolloutPercent: 36
         constraints:
         - property: "property"
           id: 1
@@ -958,11 +1150,14 @@ definitions:
         - id: 1
           variantID: 1
           variantKey: "variantKey"
-          percent: 56
+          percent: 23
         - id: 1
           variantID: 1
           variantKey: "variantKey"
-          percent: 56
+          percent: 23
+      createdBy: "createdBy"
+      id: 1
+      key: "key"
       updatedAt: "2000-01-23T04:56:07.000+00:00"
   createFlagRequest:
     type: "object"
@@ -975,6 +1170,9 @@ definitions:
       key:
         type: "string"
         description: "unique key representation of the flag"
+      template:
+        type: "string"
+        description: "template for flag creation"
   putFlagRequest:
     type: "object"
     properties:
@@ -1018,6 +1216,7 @@ definitions:
       id:
         type: "integer"
         format: "int64"
+        readOnly: true
         minimum: 1
       updatedBy:
         type: "string"
@@ -1032,10 +1231,8 @@ definitions:
         notes: "notes"
         updatedBy: "updatedBy"
         dataRecordsEnabled: true
-        createdBy: "createdBy"
         entityType: "entityType"
         description: "description"
-        id: 1
         variants:
         - attachment: "{}"
           id: 1
@@ -1043,13 +1240,17 @@ definitions:
         - attachment: "{}"
           id: 1
           key: "key"
-        key: "key"
         enabled: true
+        tags:
+        - id: 1
+          value: "value"
+        - id: 1
+          value: "value"
         segments:
         - description: "description"
           rank: 0
           id: 1
-          rolloutPercent: 93
+          rolloutPercent: 36
           constraints:
           - property: "property"
             id: 1
@@ -1063,15 +1264,15 @@ definitions:
           - id: 1
             variantID: 1
             variantKey: "variantKey"
-            percent: 56
+            percent: 23
           - id: 1
             variantID: 1
             variantKey: "variantKey"
-            percent: 56
+            percent: 23
         - description: "description"
           rank: 0
           id: 1
-          rolloutPercent: 93
+          rolloutPercent: 36
           constraints:
           - property: "property"
             id: 1
@@ -1085,14 +1286,41 @@ definitions:
           - id: 1
             variantID: 1
             variantKey: "variantKey"
-            percent: 56
+            percent: 23
           - id: 1
             variantID: 1
             variantKey: "variantKey"
-            percent: 56
+            percent: 23
+        createdBy: "createdBy"
+        id: 1
+        key: "key"
         updatedAt: "2000-01-23T04:56:07.000+00:00"
       id: 1
       updatedAt: "updatedAt"
+  tag:
+    type: "object"
+    required:
+    - "value"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+        readOnly: true
+        minimum: 1
+      value:
+        type: "string"
+        minLength: 1
+    example:
+      id: 1
+      value: "value"
+  createTagRequest:
+    type: "object"
+    required:
+    - "value"
+    properties:
+      value:
+        type: "string"
+        minLength: 1
   segment:
     type: "object"
     required:
@@ -1129,7 +1357,7 @@ definitions:
       description: "description"
       rank: 0
       id: 1
-      rolloutPercent: 93
+      rolloutPercent: 36
       constraints:
       - property: "property"
         id: 1
@@ -1143,11 +1371,11 @@ definitions:
       - id: 1
         variantID: 1
         variantKey: "variantKey"
-        percent: 56
+        percent: 23
       - id: 1
         variantID: 1
         variantKey: "variantKey"
-        percent: 56
+        percent: 23
   createSegmentRequest:
     type: "object"
     required:
@@ -1313,7 +1541,7 @@ definitions:
       id: 1
       variantID: 1
       variantKey: "variantKey"
-      percent: 56
+      percent: 23
   putDistributionsRequest:
     type: "object"
     required:
@@ -1346,9 +1574,29 @@ definitions:
         type: "string"
         description: "flagKey. flagID or flagKey will resolve to the same flag. Either\
           \ works."
+      flagTags:
+        type: "array"
+        description: "flagTags. flagTags looks up flags by tag. Either works."
+        items:
+          type: "string"
+        x-omitempty: true
+      flagTagsOperator:
+        type: "string"
+        description: "determine how flagTags is used to filter flags to be evaluated.\
+          \ OR extends the evaluation to those which contains at least one of the\
+          \ provided flagTags or AND limit the evaluation to those which contains\
+          \ all the flagTags."
+        default: "ANY"
+        enum:
+        - "ANY"
+        - "ALL"
     example:
       enableDebug: true
       entityType: "entityType"
+      flagTags:
+      - "flagTags"
+      - "flagTags"
+      flagTagsOperator: "ANY"
       entityID: "entityID"
       flagID: 1
       entityContext: "{}"
@@ -1385,6 +1633,10 @@ definitions:
       evalContext:
         enableDebug: true
         entityType: "entityType"
+        flagTags:
+        - "flagTags"
+        - "flagTags"
+        flagTagsOperator: "ANY"
         entityID: "entityID"
         flagID: 1
         entityContext: "{}"
@@ -1464,12 +1716,30 @@ definitions:
         minItems: 1
       flagKeys:
         type: "array"
-        description: "flagKeys. Either flagIDs or flagKeys works. If pass in both,\
-          \ Flagr may return duplicate results."
+        description: "flagKeys. Either flagIDs, flagKeys or flagTags works. If pass\
+          \ in multiples, Flagr may return duplicate results."
         items:
           type: "string"
           minLength: 1
         minItems: 1
+      flagTags:
+        type: "array"
+        description: "flagTags. Either flagIDs, flagKeys or flagTags works. If pass\
+          \ in multiples, Flagr may return duplicate results."
+        items:
+          type: "string"
+          minLength: 1
+        minItems: 1
+      flagTagsOperator:
+        type: "string"
+        description: "determine how flagTags is used to filter flags to be evaluated.\
+          \ OR extends the evaluation to those which contains at least one of the\
+          \ provided flagTags or AND limit the evaluation to those which contains\
+          \ all the flagTags."
+        default: "ANY"
+        enum:
+        - "ANY"
+        - "ALL"
   evaluationBatchResponse:
     type: "object"
     required:
@@ -1484,6 +1754,10 @@ definitions:
       - evalContext:
           enableDebug: true
           entityType: "entityType"
+          flagTags:
+          - "flagTags"
+          - "flagTags"
+          flagTagsOperator: "ANY"
           entityID: "entityID"
           flagID: 1
           entityContext: "{}"
@@ -1506,6 +1780,10 @@ definitions:
       - evalContext:
           enableDebug: true
           entityType: "entityType"
+          flagTags:
+          - "flagTags"
+          - "flagTags"
+          flagTagsOperator: "ANY"
           entityID: "entityID"
           flagID: 1
           entityContext: "{}"
@@ -1548,6 +1826,7 @@ x-tagGroups:
   - "constraint"
   - "distribution"
   - "variant"
+  - "tag"
 - name: "Flag Evaluation"
   tags:
   - "evaluation"

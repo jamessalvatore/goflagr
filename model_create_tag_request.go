@@ -9,7 +9,6 @@
 
 package goflagr
 
-type CreateSegmentRequest struct {
-	Description    string `json:"description"`
-	RolloutPercent int64  `json:"rolloutPercent"`
+type CreateTagRequest struct {
+	Value string `json:"value"`
 }
